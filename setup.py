@@ -24,7 +24,7 @@ setup(
         "pandas",
         "torchvision>=0.4.2",
         # "PIL",
-        "sklearn",
+        "scikit-learn",
         "tensorboard",
         "fairscale",
     ],
