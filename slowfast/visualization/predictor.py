@@ -39,8 +39,8 @@ class Predictor:
         self.model.eval()
         self.cfg = cfg
 
-        if cfg.DETECTION.ENABLE:
-            self.object_detector = Detectron2Predictor(cfg, gpu_id=self.gpu_id)
+        # if cfg.DETECTION.ENABLE:
+        #     self.object_detector = Detectron2Predictor(cfg, gpu_id=self.gpu_id)
 
         logger.info("Start loading model weights.")
         cu.load_test_checkpoint(cfg, self.model)
@@ -57,8 +57,8 @@ class Predictor:
                 prediction values (a tensor) and the corresponding boxes for
                 action detection task.
         """
-        if self.cfg.DETECTION.ENABLE:
-            task = self.object_detector(task)
+        # if self.cfg.DETECTION.ENABLE:
+        #     task = self.object_detector(task)
 
         frames, bboxes = task.frames, task.bboxes
         if bboxes is not None:
@@ -98,18 +98,23 @@ class Predictor:
                 inputs = inputs.cuda(
                     device=torch.device(self.gpu_id), non_blocking=True
                 )
+
         if self.cfg.DETECTION.ENABLE and not bboxes.shape[0]:
-            preds = torch.tensor([])
+            preds, feats  = torch.tensor([]), 0
         else:
-            preds = self.model(inputs, bboxes)
+            # import ipdb; ipdb.set_trace()
+            preds, feats  = self.model(inputs, bboxes)
 
         if self.cfg.NUM_GPUS:
             preds = preds.cpu()
+            feats = feats.cpu()
             if bboxes is not None:
                 bboxes = bboxes.detach().cpu()
 
         preds = preds.detach()
-        task.add_action_preds(preds)
+        feats = feats.detach()
+        task.add_action_preds([preds, feats])
+        # task.add_action_preds(preds)
         if bboxes is not None:
             task.add_bboxes(bboxes[:, 1:])
 

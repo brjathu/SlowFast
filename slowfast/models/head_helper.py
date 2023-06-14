@@ -116,7 +116,7 @@ class ResNetRoIHead(nn.Module):
                 "function.".format(act_func)
             )
 
-    def forward(self, inputs, bboxes):
+    def forward(self, inputs, bboxes, return_feat=False):
         assert (
             len(inputs) == self.num_pathways
         ), "Input tensor does not contain {} pathway".format(self.num_pathways)
@@ -141,12 +141,16 @@ class ResNetRoIHead(nn.Module):
             x = self.dropout(x)
 
         x = x.view(x.shape[0], -1)
+        x_ = x
+        
         if self.detach_final_fc:
             x = x.detach()
         x = self.projection(x)
         x = self.act(x)
-        return x
-
+        if(return_feat):
+            return x, x_
+        else:
+            return x
 
 class MLPHead(nn.Module):
     def __init__(

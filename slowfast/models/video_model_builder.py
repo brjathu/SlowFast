@@ -1193,7 +1193,7 @@ class MViT(nn.Module):
         if len(bcthw) == 4:  # Fix bcthw in case of 4D tensor
             bcthw.insert(2, torch.tensor(self.T))
         T, H, W = bcthw[-3], bcthw[-2], bcthw[-1]
-        assert len(bcthw) == 5 and (T, H, W) == (self.T, self.H, self.W), bcthw
+        # assert len(bcthw) == 5 and (T, H, W) == (self.T, self.H, self.W), bcthw
         B, N, C = x.shape
 
         s = 1 if self.cls_embed_on else 0
@@ -1248,7 +1248,7 @@ class MViT(nn.Module):
                 B, _, C = x.shape
                 x = x.transpose(1, 2).reshape(B, C, thw[0], thw[1], thw[2])
 
-                x = self.head([x], bboxes)
+                x = self.head([x], bboxes, return_feat=True)
 
             else:
                 if self.use_mean_pooling:
