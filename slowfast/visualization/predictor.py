@@ -46,7 +46,7 @@ class Predictor:
         cu.load_test_checkpoint(cfg, self.model)
         logger.info("Finish loading model weights")
 
-    def __call__(self, task):
+    def __call__(self, task, half=False):
         """
         Returns the prediction results for the current task.
         Args:
@@ -103,7 +103,11 @@ class Predictor:
             preds, feats  = torch.tensor([]), 0
         else:
             # import ipdb; ipdb.set_trace()
-            preds, feats  = self.model(inputs, bboxes)
+            if(half):
+                inputs[0] = inputs[0].half()
+                preds, feats  = self.model(inputs, bboxes.half())
+            else:
+                preds, feats  = self.model(inputs, bboxes)
 
         if self.cfg.NUM_GPUS:
             preds = preds.cpu()
